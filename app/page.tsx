@@ -1,9 +1,12 @@
-import React from "react";
+"use client";
+
+import React, { useState, useEffect } from "react";
 import { Button, Card, Flex, Layout } from "antd";
 import {
   AlignLeftOutlined,
   DownloadOutlined,
   HeartOutlined,
+  HeartFilled,
   MessageOutlined,
   WifiOutlined,
 } from "@ant-design/icons";
@@ -44,8 +47,20 @@ const cardStyle: React.CSSProperties = {
   flex: "1",
 };
 
-export default async function Home() {
-  const chartData = await covidDataService();
+export default function Home() {
+  const [chartData, setChartData] = useState([]);
+  const [isBarChartLiked, setIsBarChartLiked] = useState(false);
+  const [isDonutChartLiked, setIsDonutChartLiked] = useState(false);
+  // railway integration can be added
+
+  useEffect(() => {
+    const fetchChartData = async () => {
+      const data = await covidDataService();
+      setChartData(data.data);
+    };
+
+    fetchChartData();
+  }, []);
 
   if (!chartData) {
     return <div>Data not found</div>;
@@ -71,24 +86,32 @@ export default async function Home() {
             style={cardStyle}
             actions={[
               <Flex key="left-card" style={footerStyle}>
-                <HeartOutlined />
+                {isBarChartLiked ? (
+                  <HeartFilled onClick={() => setIsBarChartLiked(false)} />
+                ) : (
+                  <HeartOutlined onClick={() => setIsBarChartLiked(true)} />
+                )}
                 <MessageOutlined />
               </Flex>,
             ]}
           >
-            <BarChart covidStats={chartData.data} />
+            <BarChart covidStats={chartData} />
           </Card>
           <Card
             title="Doughnut Chart"
             style={cardStyle}
             actions={[
               <Flex key="right-card" style={footerStyle}>
-                <HeartOutlined />
+                {isDonutChartLiked ? (
+                  <HeartFilled onClick={() => setIsDonutChartLiked(false)} />
+                ) : (
+                  <HeartOutlined onClick={() => setIsDonutChartLiked(true)} />
+                )}
                 <MessageOutlined />
               </Flex>,
             ]}
           >
-            <DonutChart covidStats={chartData.data} />
+            <DonutChart covidStats={chartData} />
           </Card>
         </Flex>
       </Content>
